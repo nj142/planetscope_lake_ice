@@ -3,6 +3,8 @@ from PIL import Image
 import numpy as np
 import rasterio
 
+# Working on branch, testing how to use git
+
 # Function to perform histogram stretching on an image
 def histogram_stretch(image_array):
     """Apply histogram stretching to enhance image contrast."""
