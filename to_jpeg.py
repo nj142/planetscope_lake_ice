@@ -3,20 +3,13 @@ from PIL import Image
 import numpy as np
 import rasterio
 
-# Working on branch, testing how to use git
+# Function to perform contrast stretching on an image
+def contrast_stretch(array):
+    lower_bound = np.percentile(array, 2)
+    upper_bound = np.percentile(array, 98)
+    clipped_array = np.clip(array, lower_bound, upper_bound)
+    return ((clipped_array - lower_bound) / (upper_bound - lower_bound) * 255).astype(np.uint8)
 
-# Function to perform histogram stretching on an image
-def histogram_stretch(image_array):
-    """Apply histogram stretching to enhance image contrast."""
-    # Calculate the minimum and maximum values of the image
-    min_val = np.min(image_array)
-    max_val = np.max(image_array)
-
-    # Stretch the image
-    stretched = (image_array - min_val) / (max_val - min_val) * 255
-    stretched = np.clip(stretched, 0, 255).astype(np.uint8)
-    
-    return stretched
 
 # Function to convert a 4-band TIF to a 3-band RGB JPEG using rasterio and Pillow
 def convert_tif_to_jpeg(tif_path, jpeg_path):
@@ -27,10 +20,10 @@ def convert_tif_to_jpeg(tif_path, jpeg_path):
             green = src.read(2)  # Band 2 - Green
             blue = src.read(3)  # Band 3 - Blue
 
-            # Apply histogram stretching to each band
-            red_stretched = histogram_stretch(red)
-            green_stretched = histogram_stretch(green)
-            blue_stretched = histogram_stretch(blue)
+            # Apply contrast stretching to each band
+            red_stretched = contrast_stretch(red)
+            green_stretched = contrast_stretch(green)
+            blue_stretched = contrast_stretch(blue)
 
             # Stack the bands into a single RGB image
             rgb_image = np.stack((red_stretched, green_stretched, blue_stretched), axis=-1)
@@ -65,7 +58,7 @@ def process_study_site(study_site_path):
     num_converted = 0
 
     # JPEGs folder created for each study site
-    jpeg_folder = os.path.join(study_site_path, "JPEGs")  
+    jpeg_folder = os.path.join(study_site_path, "JPEGs_TEST")  
     if not os.path.exists(jpeg_folder):
         os.makedirs(jpeg_folder)
 
@@ -89,7 +82,7 @@ def main():
     """ This program is for converting your PlanetScope GEOTIFFs to JPEGs for use in LabelBox"""
     
     base_directory = "D:/Training/"  # Root directory
-    study_sites = ["YF","YKD"]
+    study_sites = ["TST"]
     
     total_num_collections = 0
     total_num_converted_files = 0
