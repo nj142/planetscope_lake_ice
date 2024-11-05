@@ -127,7 +127,7 @@ if __name__ == "__main__":
     masks_dir = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual\clipped_masks"
     tiffs_dir = r"D:\planetscope_lake_ice\Data_TEST\4- Planet SR TIFFs from API\Lake_Ice_Breakup_2023_YKD_psscene_analytic_sr_udm2\PSScene"
     output_dir = r"D:\planetscope_lake_ice\Data_TEST\5 - Charts & Graphics"
-    band1_idx = 1  # Red band
+    band1_idx = 3  # Red band
     band2_idx = 4  # NIR band
 
     # Define the class labels and band names dictionaries
@@ -140,9 +140,9 @@ if __name__ == "__main__":
     }
 
     band_names = {
-        1: "Red",
+        1: "Blue",
         2: "Green",
-        3: "Blue",
+        3: "Red",
         4: "NIR"
     }
 

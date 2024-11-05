@@ -178,9 +178,9 @@ if __name__ == "__main__":
     output_dir = r"D:\planetscope_lake_ice\Data_TEST\5 - Charts & Graphics"
 
     # Choose bands for comparison
-    band1_idx = 1  # Red band
+    band1_idx = 4  # NIR band
     band2_idx = 2  # Green band
-    band3_idx = 3  # Blue band
+    band3_idx = 3  # Red band
 
     # Define the class labels and band names dictionaries
     class_labels = {
@@ -192,9 +192,9 @@ if __name__ == "__main__":
     }
 
     band_names = {
-        1: "Red",
+        1: "Blue",
         2: "Green",
-        3: "Blue",
+        3: "Red",
         4: "NIR"
     }
 
