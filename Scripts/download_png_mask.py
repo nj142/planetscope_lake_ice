@@ -59,7 +59,7 @@ def get_mask(class_indices, config_path, ndjson_path, output_directory):
 if __name__ == "__main__":
     output_directory = "D:/planetscope_lake_ice/Data_TEST/3 - Download Labelbox masks here/Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual/labels_categorical"
     config_path = r"D:\planetscope_lake_ice\config.yaml"
-    ndjson_path = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual\Export v2 project - Lake Ice Project - 10_31_2024.ndjson"
+    ndjson_path = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual\Export v2 project - Lake Ice Project - 11_11_2024.ndjson"
     class_indices = {
         "Ice cover": 1,
         "Snow on ice": 2,
