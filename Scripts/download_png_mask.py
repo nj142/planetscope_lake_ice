@@ -57,15 +57,16 @@ def get_mask(class_indices, config_path, ndjson_path, output_directory):
             print(f'Saved mask to {output_path}')
 
 if __name__ == "__main__":
-    output_directory = "D:/planetscope_lake_ice/Data_TEST/3 - Download Labelbox masks here/Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual/labels_categorical"
+    output_directory = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Testing Other Class"
     config_path = r"D:\planetscope_lake_ice\config.yaml"
-    ndjson_path = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual\Export v2 project - Lake Ice Project - 11_11_2024.ndjson"
+    ndjson_path = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Testing Other Class\Export  project - Lake Ice Project - 1_9_2025.ndjson"
     class_indices = {
         "Ice cover": 1,
         "Snow on ice": 2,
         "Water": 3,
         "Cloud": 4,
         "Cloud shadow": 5,
+        "Other": 6,
     }
 
-    get_mask(class_indices, config_path, ndjson_path, output_directory)
+    get_mask(class_indices, config_path, ndjson_path, output_directory) 

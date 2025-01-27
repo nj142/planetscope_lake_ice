@@ -132,13 +132,14 @@ def predict_imagery(validation_tiffs_dir, model_path, class_labels, output_dir, 
 
 if __name__ == "__main__":
     validation_tiffs_dir = r"D:\planetscope_lake_ice\Test_Files\RFColor\COLOR_TEST\RFTesting\QGIS_Clipped"
-    model_path = r"D:\planetscope_lake_ice\Data_TEST\6 - Models\RF 10 images no clouds\random_forest_model.joblib"
+    model_path = r"D:\planetscope_lake_ice\Data_TEST\6 - Models\Trying with Other Class\random_forest_model.joblib"
     output_dir = r"D:\planetscope_lake_ice\Data_TEST\7 - Predictions"
     
     class_labels = {
         1: "Ice cover",
         2: "Snow on ice",
-        3: "Water"
+        3: "Water",
+        6: "Other",
     }
     
     print("Starting predictions...")

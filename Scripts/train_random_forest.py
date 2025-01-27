@@ -21,6 +21,18 @@ def normalize_bands(bands):
             normalized[i] = ((band - min_val) / (max_val - min_val) * 255).astype(np.uint8)
     return normalized
 
+def find_matching_tiff(mask_filename, tiffs_dir):
+    """
+    Recursively search for matching TIFF file in the given directory and its subdirectories.
+    """
+    base_tiff_name = mask_filename.replace("_Visual_mask.png", "_AnalyticMS_SR.tif")
+    
+    for root, _, files in os.walk(tiffs_dir):
+        if base_tiff_name in files:
+            return os.path.join(root, base_tiff_name)
+    
+    return None
+
 def extract_training_data(masks_dir, tiffs_dir, class_labels, samples_per_class=10000):
     """
     Extract training data from mask and TIF pairs.
@@ -33,10 +45,11 @@ def extract_training_data(masks_dir, tiffs_dir, class_labels, samples_per_class=
             continue
             
         mask_path = os.path.join(masks_dir, mask_filename)
-        tif_filename = mask_filename.replace("_Visual_mask.png", "_AnalyticMS_SR.tif")
-        tif_path = os.path.join(tiffs_dir, tif_filename)
         
-        if not os.path.exists(tif_path):
+        # Find matching TIFF file recursively
+        tif_path = find_matching_tiff(mask_filename, tiffs_dir)
+        
+        if not tif_path:
             print(f"TIF file not found for mask: {mask_filename}")
             continue
         
@@ -116,15 +129,16 @@ def train_random_forest(X, y, class_labels, output_dir, n_estimators=100):
 
 if __name__ == "__main__":
     # Define paths
-    masks_dir = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Lake_Ice_Breakup_2023_YKD_RGB_psscene_visual\clipped_masks"
-    tiffs_dir = r"D:\planetscope_lake_ice\Data_TEST\4- Planet SR TIFFs from API\Lake_Ice_Breakup_2023_YKD_psscene_analytic_sr_udm2\PSScene"
+    masks_dir = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Testing Other Class"
+    tiffs_dir = r"D:\planetscope_lake_ice\Data_TEST\4- Planet SR TIFFs from API\YKD_YF_2023"
     output_dir = r"D:\planetscope_lake_ice\Data_TEST\6 - Models"
     
     # Define class labels (removed cloud and cloud mask)
     class_labels = {
         1: "Ice cover",
         2: "Snow on ice",
-        3: "Water"
+        3: "Water",
+        6: "Other",
     }
     
     # Extract training data
