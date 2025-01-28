@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import rasterio
 
-# SCRIPT ORDER #1 - CONVERT TIFFs to JPGs
+# SCRIPT ORDER #1 - CONVERT DOWNLOADED PLANETSCOPE RGB TIFFs to JPGs
 
 def convert_tif_to_jpg(tif_path, jpg_path, band_config):
     """
