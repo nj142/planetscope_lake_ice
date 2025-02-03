@@ -12,29 +12,28 @@ def process_sr_image(sr_path, config):
         base_name = os.path.basename(sr_path)
         print(f"\nProcessing {base_name}...")
         
-        # Create temporary directory for this image.
-        temp_dir = os.path.join(config['temp_dir'], os.path.splitext(base_name)[0])
+        # Create temporary directory for this image's shapefiles
+        temp_dir = os.path.join(config['output_shapefiles_dir'], os.path.splitext(base_name)[0])
         os.makedirs(temp_dir, exist_ok=True)
         
-        # 1. Clip vector to UDM valid data extent (using our fast ogr2ogr with coordinate transformation)
+        # 1. Clip vector to UDM valid data extent
         print("Clipping lakes to valid UDM data extent (excluding padded areas)...")
         clipped_vectors = os.path.join(temp_dir, "clipped_lakes.shp")
         
-        # Find corresponding UDM file.
-        # Replace _AnalyticMS_SR with _udm2 in the file name.
+        # Find corresponding UDM file
         udm_name = base_name.replace('_AnalyticMS_SR.tif', '_udm2.tif')
-        udm_path = os.path.join(config['psscene_dir'], udm_name)
+        udm_path = os.path.join(os.path.dirname(sr_path), udm_name)
         if not os.path.exists(udm_path):
             print(f"Could not find UDM file: {udm_path}")
             print("Checking directory contents...")
-            for f in os.listdir(config['psscene_dir']):
+            for f in os.listdir(os.path.dirname(sr_path)):
                 if 'udm' in f.lower():
                     print(f"Found UDM file: {f}")
             raise ValueError(f"UDM file not found for {base_name}")
             
         print(f"Found UDM file: {udm_name}")
         
-        # Use the UDM file (band 8) to clip the vector.
+        # Use the UDM file (band 8) to clip the vector
         features_kept = clip_vector_to_raster(
             config['vector_path'],
             udm_path,
@@ -42,12 +41,9 @@ def process_sr_image(sr_path, config):
         )
         print(f"Lakes kept: {features_kept}")
         
-        # 2. Create masked raster (using the original SR image and the UDM file as before)
+        # 2. Create masked raster
         print("Removing unusable data...")
-        masked_dir = os.path.join(config['output_dir'], os.path.splitext(base_name)[0])
-        os.makedirs(masked_dir, exist_ok=True)
-        
-        masked_path = os.path.join(masked_dir, "masked.tif")
+        masked_path = os.path.join(config['masked_dir'], base_name)
         create_masked_raster(
             sr_path,
             udm_path,
@@ -56,11 +52,11 @@ def process_sr_image(sr_path, config):
             config['keep_bands'],
             masked_path
         )
-        print(f"Masked {', '.join(['band ' + str(b) for b in config['keep_bands']])} saved to {masked_dir}")
+        print(f"Masked {', '.join(['band ' + str(b) for b in config['keep_bands']])} saved to {masked_path}")
         
         # 3. Classify ice cover
         print("Classifying ice cover...")
-        classified_path = os.path.join(masked_dir, "classified.tif")
+        classified_path = os.path.join(config['classified_dir'], base_name)
         classify_ice_cover(
             masked_path,
             config['thresholds'],
@@ -69,14 +65,14 @@ def process_sr_image(sr_path, config):
         class_labels = [f"{i+1} = {name}" for i, name in enumerate(config['thresholds'].keys())]
         print(f"Categorical classified ice mask saved with {', '.join(class_labels)}")
         
-        # 4. Update lake statistics
+        """# 4. Update lake statistics
         print("Calculating lake statistics...")
         update_lake_statistics(
             config['vector_path'],
             classified_path,
             os.path.splitext(base_name)[0],
             config['min_clear_percent']
-        )
+        )"""
         
         print("Processing completed successfully!")
         
@@ -84,12 +80,23 @@ def process_sr_image(sr_path, config):
         print(f"Error processing {sr_path}: {str(e)}")
 
 def main():
+    # Input folders to process
+    input_folders = [
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2017_YF_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2017_YKD_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2019_YF_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2019_YKD_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2021_YF_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2021_YKD_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2023_YF_psscene_analytic_sr_udm2\PSScene",
+        r"D:\planetscope_lake_ice\Data\4 - Planet SR TIFFs from API\Lake_Ice_Breakup_2023_YKD_psscene_analytic_sr_udm2\PSScene"
+    ]
+    
     # Configuration
     config = {
-        'psscene_dir': r"D:\planetscope_lake_ice\Data\10 - Time Series Output\Time_Series_Test_Lake_Ice_Freezeup_2024_YKD_psscene_analytic_sr_udm2\PSScene",
         'vector_path': r"D:\planetscope_lake_ice\Data\8 - Download ALPOD data here\ALPODlakes.shp",
-        'output_dir': r"D:\planetscope_lake_ice\Data\10 - Time Series Output\Usable Ice Cover Data",
-        'temp_dir': r"D:\planetscope_lake_ice\Data\10 - Time Series Output\SR Extent Lake Shapefiles",
+        'output_rasters_dir': r"D:\planetscope_lake_ice\Data\11 - Break Up Time Series Output\Rasters",
+        'output_shapefiles_dir': r"D:\planetscope_lake_ice\Data\11 - Break Up Time Series Output\Shapefiles",
         
         # Bands to mask out (e.g. cloud and cloud shadow)
         'mask_bands': [3, 6],
@@ -97,8 +104,7 @@ def main():
         # Bands to keep from SR image
         'keep_bands': [3],
         
-        # Classification thresholds:
-        # Each key will be assigned a numeric class (1, 2, 3, …).
+        # Classification thresholds
         'thresholds': {
             'Ice': (950, 3800),
             'Snow': (3800, float('inf')),
@@ -109,23 +115,33 @@ def main():
         'min_clear_percent': 50
     }
     
-    # Create output directories.
-    os.makedirs(config['output_dir'], exist_ok=True)
-    os.makedirs(config['temp_dir'], exist_ok=True)
+    # Create output directory structure
+    os.makedirs(config['output_rasters_dir'], exist_ok=True)
+    os.makedirs(config['output_shapefiles_dir'], exist_ok=True)
     
-    # Get all SR files.
-    sr_files = glob.glob(os.path.join(config['psscene_dir'], '*_SR.tif'))
-    if not sr_files:
-        print(f"No SR files found in {config['psscene_dir']}")
-        return
+    # Create Masked and Classified directories
+    config['masked_dir'] = os.path.join(config['output_rasters_dir'], 'Masked')
+    config['classified_dir'] = os.path.join(config['output_rasters_dir'], 'Classified')
+    os.makedirs(config['masked_dir'], exist_ok=True)
+    os.makedirs(config['classified_dir'], exist_ok=True)
     
-    print(f"Found {len(sr_files)} SR files to process")
+    # Process all input folders
+    total_files = 0
+    for folder in input_folders:
+        print(f"\nProcessing folder: {folder}")
+        sr_files = glob.glob(os.path.join(folder, '*_SR.tif'))
+        if not sr_files:
+            print(f"No SR files found in {folder}")
+            continue
+        
+        print(f"Found {len(sr_files)} SR files to process")
+        total_files += len(sr_files)
+        
+        # Process each SR image
+        for sr_file in sr_files:
+            process_sr_image(sr_file, config)
     
-    # Process each SR image.
-    for sr_file in sr_files:
-        process_sr_image(sr_file, config)
-    
-    print("\nAll processing completed!")
+    print(f"\nAll processing completed! Processed {total_files} files across {len(input_folders)} folders")
 
 if __name__ == "__main__":
     main()
