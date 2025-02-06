@@ -5,48 +5,45 @@ from osgeo import gdal, ogr, osr
 
 def clip_vector_to_raster(vector_path, udm_path, output_path):
     """
-    Clips a vector shapefile (e.g., lakes) to include only features that are completely within
-    the valid data area of a UDM 2.1 mask. The UDM’s band 8 is interpreted so that pixels where
-    bit 0 equals 1 are considered "no data" (padding) and all other pixels are considered real data.
-    The valid-data area is polygonized and then transformed to the vector’s coordinate system
-    for filtering.
+    Clips a vector shapefile (e.g., lakes) to export only features that are completely within
+    the area of a given raster. 
     
-    To avoid creating an extremely long WKT string (which can trigger Windows error 206),
-    the valid-data polygon is simplified before being used in the SQL query.
+    In my project, Planet's UDM 2.1 band 8 is passed in as the raster extent; pixels where bit 0 equals 1 are 
+    considered "no data" pixels (this is the empty padding around diagonal PlanetScope images) and all other 
+    pixels are considered actual data. The valid-data area is polygonized and then transformed to the vector’s 
+    coordinate system. Then the input vector file to be clipped (e.g. ALPOD) is clipped to only keep features 
+    contained entirely within the raster's polygonized mask.
+
+    Note this code could be run straight in ogr2ogr if your raster data is not on a diagonal surrounded
+    by empty padding.
     
     Parameters:
-      vector_path: Path to the input shapefile.
-      udm_path: Path to the UDM 2.1 mask file (PlanetScope UDM) whose band 8 is used.
+      vector_path: Filepath to the input multi-polygon shapefile (ALPOD in this example).
+      udm_path: Filepath to the UDM 2.1 mask (PlanetScope UDM band 8 in this example) used to get valid data.
       output_path: Path for the output clipped shapefile.
       
     Returns:
       features_kept: The number of features (lakes) kept.
     """
+
     # -------------------------------------------------------------------------
-    # 1. Open the UDM file and extract band 8 (PlanetScope UDM)
-    # -------------------------------------------------------------------------
+    # 1. Open the Planet UDM file and extract band 8 to get valid data extent
+    # ------------------------------------------------------------------------- 
     udm_ds = gdal.Open(udm_path)
     if udm_ds is None:
         raise ValueError(f"Could not open UDM file: {udm_path}")
 
-    # Note: In GDAL bands are 1-indexed. Here we assume band 8 contains the UDM bit mask.
+    # In GDAL bands are 1-indexed.
     band8 = udm_ds.GetRasterBand(8)
-    if band8 is None:
-        raise ValueError("UDM file does not contain band 8.")
-        
-    # Read band 8 as an array.
     band8_array = band8.ReadAsArray()
-    if band8_array is None:
-        raise ValueError("Could not read data from band 8 of the UDM file.")
 
-    # Create a binary mask: valid data = 1 when bit 0 is NOT set (i.e. (value & 1)==0),
-    # otherwise 0. (Bit 0==1 indicates black fill or padding.)
-    valid_mask = np.where((band8_array & 1) == 0, 1, 0)
+    # Create a binary mask of valid data (planet UDM band 8 is a series of bits with the first marking valid pixels)
+    valid_mask = np.where((band8_array & 1) == 0, 1, 0) 
 
     # -------------------------------------------------------------------------
     # 2. Polygonize the valid data area from the binary mask
     # -------------------------------------------------------------------------
-    # Create an in‑memory raster to hold the valid mask.
+    # Create an in‑memory raster to hold the valid mask. Using in-memory drivers makes this very fast.
     mem_driver = gdal.GetDriverByName('MEM')
     mem_ds = mem_driver.Create('', udm_ds.RasterXSize, udm_ds.RasterYSize, 1, gdal.GDT_Byte)
     mem_ds.SetGeoTransform(udm_ds.GetGeoTransform())
@@ -54,21 +51,21 @@ def clip_vector_to_raster(vector_path, udm_path, output_path):
     mem_band = mem_ds.GetRasterBand(1)
     mem_band.WriteArray(valid_mask)
     
-    # Create an in‑memory vector layer to store the polygonized valid areas.
+    # Create an in‑memory vector layer to store the polygonized raster extent. Using in-memory drivers makes this very fast.
     mem_vector_driver = ogr.GetDriverByName('Memory')
     mem_vector_ds = mem_vector_driver.CreateDataSource('out')
     udm_srs = osr.SpatialReference()
     udm_srs.ImportFromWkt(udm_ds.GetProjection())
     poly_layer = mem_vector_ds.CreateLayer('poly', srs=udm_srs)
     
-    # Add an attribute field to record the pixel value.
+    # Add an attribute field to the polygonized extent (this lets us convert ones in the mask to polygons.)
     field_defn = ogr.FieldDefn('value', ogr.OFTInteger)
     poly_layer.CreateField(field_defn)
     
     # Polygonize the binary mask.
     gdal.Polygonize(mem_band, None, poly_layer, 0, [], callback=None)
     
-    # Union all polygons that represent valid data (value==1).
+    # Union all polygons that represent valid data (value==1) to turn individual pixels into one vector item.
     valid_poly = None
     for feature in poly_layer:
         val = feature.GetField('value')
@@ -78,12 +75,9 @@ def clip_vector_to_raster(vector_path, udm_path, output_path):
                 valid_poly = geom
             else:
                 valid_poly = valid_poly.Union(geom)
-    
-    if valid_poly is None:
-        raise ValueError("No valid data area found in the UDM mask.")
 
     # -------------------------------------------------------------------------
-    # 3. Simplify the valid-data polygon to avoid extremely long WKT strings.
+    # 3. Simplify the valid-data polygon to avoid extremely long Well Known Text (WKT) strings.
     # -------------------------------------------------------------------------
     # Use a tolerance equal to roughly 10 pixels.
     gt = udm_ds.GetGeoTransform()
