@@ -14,7 +14,7 @@ def clip_vector_to_raster(vector_path, udm_path, output_path):
     coordinate system. Then the input vector file to be clipped (e.g. ALPOD) is clipped to only keep features 
     contained entirely within the raster's polygonized mask.
 
-    Note this code could be run straight in ogr2ogr if your raster data is not on a diagonal surrounded
+    Note this code could be simplified dramatically if your raster data is not on a diagonal surrounded
     by empty padding.
     
     Parameters:
