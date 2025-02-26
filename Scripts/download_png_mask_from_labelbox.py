@@ -5,6 +5,8 @@ import numpy as np
 import ndjson
 import os
 
+# SCRIPT ORDER #2 - DOWNLOAD LABELBOX JPGs
+
 def get_mask(class_indices, config_path, ndjson_path, output_directory):
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
