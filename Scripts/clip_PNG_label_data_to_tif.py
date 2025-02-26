@@ -9,7 +9,12 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True  # Handle truncated images
 def process_and_mask_images(png_dir, tiff_dir, output_dir):
     """
     Process all PNG files in the specified directory by finding and applying 
-    corresponding TIFF masks from a given root directory.
+    corresponding TIFF masks from a given root directory.  Saves as PNG because
+    adding georeference data back to TIF is not necessary if files remain the same size.
+
+    Download is a 1 band PNG with 0 1 2 3... categorical pixels in the band.
+    Clipped rasters are still single band, with -9999 unavailable data and 0 is unlabeled, then the rest
+    are classes.  Note to remove 0 in final processing.
     
     Parameters:
     png_dir (str): Directory containing PNG files to be masked
@@ -78,7 +83,7 @@ def process_and_mask_images(png_dir, tiff_dir, output_dir):
             
             # Apply mask
             masked_png = png_array.copy()
-            masked_png[~mask] = 0
+            masked_png[~mask] = -9999
             
             # Prepare output path
             output_path = os.path.join(output_dir, png_filename)
@@ -89,8 +94,8 @@ def process_and_mask_images(png_dir, tiff_dir, output_dir):
             print(f"Masked PNG saved to {output_path}")
 
 if __name__ == "__main__":
-    png_dir = r"D:\planetscope_lake_ice\Data\3 - Download Labelbox masks here\YKD_YF_2023\labels_categorical"
-    tiff_dir = r"D:\planetscope_lake_ice\Data\1 - Download your Planet RGB orders here"
-    output_dir = r"D:\planetscope_lake_ice\Data\3 - Download Labelbox masks here\YKD_YF_2023\clipped_masks"
+    png_dir = r"D:\planetscope_lake_ice\Data (Validation)\3 - Download Labelbox masks here\Unclipped 1 Band PNG LabelBox Masks"
+    tiff_dir = r"D:\planetscope_lake_ice\Data (Validation)\1 - Download your Planet RGB orders here"
+    output_dir = r"D:\planetscope_lake_ice\Data (Validation)\3 - Download Labelbox masks here\LabelBox Masks Clipped to TIFFs"
 
     process_and_mask_images(png_dir, tiff_dir, output_dir)
