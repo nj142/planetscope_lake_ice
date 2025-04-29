@@ -93,9 +93,14 @@ def calculate_lake_statistics(lake_id_mask_path, classified_path, img_name,
     parts = basename.split('_')
     try:
         date_part, time_part = parts[0], parts[1]
-        dt = datetime.datetime.strptime(date_part + time_part, '%Y%m%d%H%M%S')
-        dt = dt.replace(tzinfo=datetime.timezone.utc)  # force UTC
-        image_timestamp = int(dt.timestamp())          # safe UTC timestamp
+        # 1) parse into a naive datetime
+        dt = datetime.strptime(date_part + time_part, '%Y%m%d%H%M%S')
+
+        # 2) tell Python “this really is UTC”
+        dt = dt.replace(tzinfo=timezone.utc)
+
+        # 3) get the Unix seconds since the epoch
+        image_timestamp = int(dt.timestamp())
 
     except Exception:
         # Fallback if parsing fails
