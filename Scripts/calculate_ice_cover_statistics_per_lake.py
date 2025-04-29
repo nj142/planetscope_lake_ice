@@ -1,7 +1,7 @@
 import os
 import time
 import calendar
-import datetime
+from datetime import datetime, timezone
 import numpy as np
 import netCDF4 as nc
 from osgeo import gdal, ogr
