@@ -94,8 +94,8 @@ def process_and_mask_images(png_dir, tiff_dir, output_dir):
             print(f"Masked PNG saved to {output_path}")
 
 if __name__ == "__main__":
-    png_dir = r"D:\planetscope_lake_ice\Data (Validation)\3 - Download Labelbox masks here\Unclipped 1 Band PNG LabelBox Masks"
-    tiff_dir = r"D:\planetscope_lake_ice\Data (Validation)\1 - Download your Planet RGB orders here"
-    output_dir = r"D:\planetscope_lake_ice\Data (Validation)\3 - Download Labelbox masks here\LabelBox Masks Clipped to TIFFs"
+    png_dir = r"D:\planetscope_lake_ice\Data (Freeze Up Training)\2 - Download Labelbox masks here"
+    tiff_dir = r"D:\planetscope_lake_ice\Data (Freeze Up Training)\1 - Download Freeze Up SR Orders Here"
+    output_dir = r"D:\planetscope_lake_ice\Data (Freeze Up Training)\2 - Download Labelbox masks here\Clipped to TIFFs"
 
     process_and_mask_images(png_dir, tiff_dir, output_dir)

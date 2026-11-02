@@ -5,7 +5,7 @@ import numpy as np
 import ndjson
 import os
 
-# SCRIPT ORDER #2 - DOWNLOAD LABELBOX JPGs
+# SCRIPT ORDER #2 - DOWNLOAD LABELBOX IMAGES
 
 def get_mask(class_indices, config_path, ndjson_path, output_directory):
     with open(config_path, 'r') as file:
@@ -59,9 +59,9 @@ def get_mask(class_indices, config_path, ndjson_path, output_directory):
             print(f'Saved mask to {output_path}')
 
 if __name__ == "__main__":
-    output_directory = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Testing Other Class"
+    output_directory = r"D:\planetscope_lake_ice\Data (Freeze Up Training)\2 - Download Labelbox masks here"
     config_path = r"D:\planetscope_lake_ice\config.yaml"
-    ndjson_path = r"D:\planetscope_lake_ice\Data_TEST\3 - Download Labelbox masks here\Testing Other Class\Export  project - Lake Ice Project - 1_9_2025.ndjson"
+    ndjson_path = r"D:\planetscope_lake_ice\Data (Freeze Up Training)\2 - Download Labelbox masks here\Export  project - Lake Ice Project - 4_2_2025.ndjson"
     class_indices = {
         "Ice cover": 1,
         "Snow on ice": 2,

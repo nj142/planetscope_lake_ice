@@ -20,12 +20,7 @@ def convert_tif_to_jpg(tif_path, jpg_path):
         with rasterio.open(tif_path) as src:
             # Print raster details to help diagnose issues
             print(f"  File info: {src.count} bands, dtype: {src.dtypes[0]}, shape: {src.shape}")
-            
-            # Make sure we have at least 3 bands for RGB
-            if src.count < 3:
-                print(f"  Error: Not enough bands ({src.count}). Need at least 3 for RGB.")
-                return False
-            
+
             # Read the B G R bands (assuming 4-band BGRNIR format)
             blue = src.read(1)
             green = src.read(2)
@@ -146,7 +141,7 @@ def main():
     
     # List of collections to process
     collections = [
-        "Lake_Ice_Freezeup_2019_2020_YKD_psscene_analytic_sr_udm2"
+        "Time_Series_Test_Lake_Ice_Freezeup_2024_YKD_psscene_analytic_sr_udm2"
         # Add more collections as needed
     ]
     
