@@ -1,2 +1,0 @@
-Sentinel-2 break-up classification was performed on Google Earth Engine.  Scripts provided here:
-XXX NEED TO ADD HERE XXX
