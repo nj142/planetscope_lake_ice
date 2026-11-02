@@ -3,6 +3,7 @@
 !/Notebooks/
 !/Scripts/
 /Scripts/*/
+/Data (Results)
 !/.gitignore
 !/LICENSE
 !/README*
