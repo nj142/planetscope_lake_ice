@@ -5,4 +5,4 @@ Advisor: Dr. Sarah Cooley
 Grant funding: NASA CSDA Program
 Program: Duke University Nicholas School of the Environment
 
-2024
+2024 - 2026
